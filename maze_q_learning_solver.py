@@ -11,7 +11,8 @@ import time
 LEARNING_RATE = 0.3
 DISCOUNT_RATE = 0.9
 NUM_EPISODES = 2000
-RENDER_INTERVAL = 50
+RENDER_EPISODE_INTERVAL = 50
+RENDER_SLEEP_INTERVAL = 0.05  # how long to pause before rendering the next
 
 epsilon = 0.7  # determines whether to explore or exploit; decays over time
 EPSILON_DECAY_START = 1
@@ -28,11 +29,13 @@ q_table = np.random.uniform(
 # ep_rewards = []
 # aggr_ep_rewards = {'ep': [], 'avg': [], 'min': [], 'max': []}
 
-# training
+# ============================== TRAINING ==============================
+
 for episode in range(NUM_EPISODES):
     episode_reward = 0
     curr_x, curr_y = maze.initialize()
-    if episode % RENDER_INTERVAL == 0:  # shows the first but not the last episode
+    # shows the first but not the last episode
+    if episode % RENDER_EPISODE_INTERVAL == 0:
         rendering = True
     else:
         rendering = False
@@ -43,7 +46,7 @@ for episode in range(NUM_EPISODES):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     rendering = False
-            time.sleep(0.05)
+            time.sleep(RENDER_SLEEP_INTERVAL)
             maze.render()
 
         if np.random.random() > epsilon:
@@ -70,18 +73,18 @@ for episode in range(NUM_EPISODES):
     # uncomment to satiate the stats nerds - part 2
     # ep_rewards.append(episode_reward)
 
-    # if episode % RENDER_INTERVAL == 0:
+    # if episode % RENDER_EPISODE_INTERVAL == 0:
     #     average_reward = sum(
-    #         ep_rewards[-RENDER_INTERVAL:]) / len(ep_rewards[-RENDER_INTERVAL:])
+    #         ep_rewards[-RENDER_EPISODE_INTERVAL:]) / len(ep_rewards[-RENDER_EPISODE_INTERVAL:])
     #     aggr_ep_rewards['ep'].append(episode)
     #     aggr_ep_rewards['avg'].append(average_reward)
-    #     aggr_ep_rewards['min'].append(min(ep_rewards[-RENDER_INTERVAL:]))
-    #     aggr_ep_rewards['max'].append(max(ep_rewards[-RENDER_INTERVAL:]))
+    #     aggr_ep_rewards['min'].append(min(ep_rewards[-RENDER_EPISODE_INTERVAL:]))
+    #     aggr_ep_rewards['max'].append(max(ep_rewards[-RENDER_EPISODE_INTERVAL:]))
     
     # print(
-    #     f'Episode: {episode}, average reward: {average_reward}, min: {min(ep_rewards[-RENDER_INTERVAL:])}, max: {max(ep_rewards[-RENDER_INTERVAL:])}')
+    #     f'Episode: {episode}, average reward: {average_reward}, min: {min(ep_rewards[-RENDER_EPISODE_INTERVAL:])}, max: {max(ep_rewards[-RENDER_EPISODE_INTERVAL:])}')
 
-# post training - pure exploitation of the Q-table
+# ================== POST-TRAINING: PURE EXPLOITATION ==================
 
 rendering = True
 curr_x, curr_y = maze.initialize()
@@ -92,13 +95,13 @@ while rendering:
         if event.type == pygame.QUIT:
             rendering = False
 
-    time.sleep(0.05)
+    time.sleep(RENDER_SLEEP_INTERVAL)
     action = np.argmax(q_table[curr_x][curr_y])
     curr_x, curr_y, reward, isDone = maze.take_action(action)
     maze.render()
 
     if isDone:
-        time.sleep(2)
+        time.sleep(RENDER_SLEEP_INTERVAL * 4)
         curr_x, curr_y = maze.initialize()
         maze.render()
 
